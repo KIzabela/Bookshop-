@@ -1,0 +1,214 @@
+
+
+Funkcje PL/SQL u¿yte w bazie danych
+1.Procedura dodaj¹ca liczbê egzemplarzy danej ksi¹¿ki
+
+create or replace 
+procedure dodaj_do_stanu(
+idk in ksiazki.idksiazki%type,
+dodajilosc in ksiazki.stan%type) is
+begin
+update ksiazki set stan = stan+dodajilosc where idksiazki=idk;
+end;
+
+2.Procedura, która pozwala na dodanie przez u¿ytkownika recenzji do danej ksi¹¿ki
+
+ create or replace 
+procedure dodaj_recenzje(
+
+R_TEKST IN RECENZJE.TEKST%TYPE,
+R_IDKLIENTA IN RECENZJE.IDKLIENTA%TYPE,
+R_IDKSIAZKI IN RECENZJE.IDKSIAZKI%TYPE) IS
+R_DATADODANIA DATE;
+BEGIN
+select SYSDATE into R_DATADODANIA from dual;
+INSERT INTO RECENZJE VALUES(RECENZJE_SEQID.NEXTVAL,R_TEKST,R_DATADODANIA,R_IDKLIENTA,R_IDKSIAZKI);
+END;
+
+3. Procedura pozwalaj¹ca u¿ytkownikowi na zmianê obecnego has³a na nowe
+
+create or replace 
+procedure nowehaslo(
+idk IN KLIENCI.IDKLIENTA%TYPE,
+nowe_haslo IN KLIENCI.HASLO%TYPE) IS
+BEGIN
+UPDATE KLIENCI SET HASLO= nowe_haslo where IDKLIENTA = idk;
+END;
+
+4. Procedura pozwalaj¹ca na utworzenie nowego u¿ytkownika
+
+create or replace 
+PROCEDURE nowy_klient(
+K_LOGIN IN KLIENCI.LOGIN%type,
+K_HASLO IN KLIENCI.HASLO%type,
+K_IMIE IN KLIENCI.IMIE%type,
+K_NAZWISKO IN KLIENCI.NAZWISKO%type,
+K_MIEJSCOWOSC IN KLIENCI.MIEJSCOWOSC%type,
+K_KOD IN KLIENCI.KOD%type,
+K_ULICA IN KLIENCI.ULICA%type,
+K_EMAIL IN KLIENCI.EMAIL%type) AS
+BEGIN
+INSERT INTO KLIENCI VALUES(KLIENCI_SEQID.NEXTVAL, K_LOGIN, K_HASLO, K_IMIE, K_NAZWISKO, K_MIEJSCOWOSC, K_KOD, K_ULICA, K_EMAIL);
+END nowy_klient;
+
+5. Procedura pozwalaj¹ca na usuniêcie ksi¹¿ki z koszyka
+
+create or replace 
+procedure usun_artykul(
+idk in artykuly.idksiazki%type,
+idzam in artykuly.idzamowienia%type,
+ilosc in artykuly.idzamowienia%type) is
+begin
+delete from artykuly where idksiazki = idk and idzamowienia = idzam;
+dodaj_do_stanu(idk,ilosc);
+end;
+
+6. Funkcja pozwalaj¹ca u¿ytkownikowi na zmianê liczby egzemplarzy zamawianej ksi¹¿ki znajduj¹cej sie w koszyku klienta
+
+create or replace 
+function zmien_ilosc(
+idz in artykuly.idzamowienia%type,
+idk in artykuly.idksiazki%type,
+nowailosc in artykuly.sztuk%type
+aktualnailosc in artykuly.sztuk%type) is
+ilosc in artykuly.sztuk%type;
+begin
+if aktualnailosc<nowailosc then
+  ilosc:=nowailosc-aktualnailosc;
+  if stan(idk,ilosc) then
+   update artykuly set sztuk = sztuk+ilosc where idzamowienia = idz and idksiazki = idk;
+   pomniejsz_stan(idk,ilosc);
+   return 1;
+   end if
+   return -1;
+end if;
+
+if aktualnailosc>nowailosc then
+  ilosc:=aktualnailosc-nowailosc;
+  dodaj_do_stanu(idk,nowailosc);
+  return 1;
+else
+return 2;
+end if;
+end;
+
+7. Funkcja, która wylicza ca³kowity koszt zamawianych ksi¹¿ek znajduj¹ch siê w koszyku
+
+create or replace 
+function cena_zakupu(
+idzam in artykuly.idzamowienia%type) return number is
+cenazam number(7,2);
+ii integer;
+xx integer;
+begin
+select artykuly.idzamowienia, sum(ksiazki.cena*artykuly.sztuk) into ii,cenazam from artykuly join ksiazki on artykuly.idksiazki = ksiazki.idksiazki
+where idzamowienia=idzam group by artykuly.idzamowienia;
+return cenazam;
+end;
+
+8. Funkcja sprawdzaj¹ca iloœæ egzemplarzy danej ksi¹zki na stanie magazynu i jej modyfikacjê 
+
+create or replace 
+function stan(
+id_ksi¹¿ki IN KSIAZKI.IDKSIAZKI%TYPE,
+liczba IN KSIAZKI.STAN%TYPE) 
+return boolean IS
+iloœæ KSIAZKI.STAN%TYPE;
+
+begin
+select stan into iloœæ from ksiazki 
+where idksiazki = id_ksi¹¿ki;
+
+if iloœæ >= liczba then
+UPDATE ksiazki set stan=stan-liczba where idksiazki = id_ksi¹¿ki;
+return true;
+else
+return false;
+end if;
+
+exception when no_data_found then
+DBMS_OUTPUT.Put_line('Wystapi³ b³¹d, niepoprawne id');
+end;
+
+
+10. Funkcja wstawiaj¹ca dane do tabeli artyku³y
+
+create or replace 
+function wstaw_artykuly(
+id_ksi¹¿ki IN ksiazki.idksiazki%type,
+liczba IN ksiazki.stan%type,
+zam IN zamowienia.idzamowienia%type) 
+return integer IS
+
+begin
+if stan(id_ksi¹¿ki,liczba) then
+insert into artykuly values (zam,id_ksi¹¿ki,liczba);
+return 1;
+else
+return -1;
+end if;
+end;
+
+
+11. Funkcja generuj¹ca id zamówienia. Wstawia dane do tabeli zamówienia.
+
+create or replace 
+function zamow(
+id_klienta in zamowienia.idklienta%type) return integer is
+x integer;
+y integer;
+data_zamowienia date;
+begin
+select id_zam.nextval into x from dual;
+y := id_zam.currval;
+select SYSDATE into data_zamowienia from dual;
+insert into zamowienia values(y,data_zamowienia,id_klienta);
+return y;
+end;
+
+12. Funkcja zwracaj¹ca id danego klienta
+
+create or replace 
+function zwroc_id(
+k_log in klienci.login%type) return integer is
+k_id klienci.idklienta%type;
+begin
+select idklienta into k_id from klienci where login=k_log;
+return k_id;
+end;
+
+13. Procedura zmniejszaj¹ca iloœæ ksi¹¿ek w magazynie
+
+create or replace 
+procedure pomniejsz_stan(
+idk in ksiazki.idksiazki%type,
+ilosc in ksiazki.stan%type) is
+begin
+update ksiazki set stan = stan-ilosc where idksiazki=idk;
+end;
+
+12. Sekwencja generuj¹ca id zamówienia
+create sequence id_zam
+minvalue 1
+maxvalue 999999
+start with 11
+increment by 1
+nocycle;
+
+
+13.Sekwencja generuj¹ca id klienta
+ create sequence klienci_seqid
+minvalue 1
+maxvalue 999999
+start with 11
+increment by 1
+nocycle;
+
+
+14. Sekwencja generuj¹ca id dodanej recenzji
+create sequence recenzje_seqid
+minvalue 1
+maxvalue 999999
+start with 11
+increment by 1
+nocycle;
