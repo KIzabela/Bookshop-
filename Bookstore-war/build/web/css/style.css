@@ -1,0 +1,211 @@
+
+/* 
+    Created on : 2015-05-15, 16:16:58
+    Author     : Izabela
+*/
+
+body{
+color: gray;
+
+}
+
+#techinfo{
+font-family: TradeGothic;
+font-size:4em;
+text-shadow: rgba(0, 0, 0, 0.5) 0px 1px;
+
+}
+#blok{
+height:160px;
+border-bottom: inset;
+border-color: #B56951;
+}
+#blok1{
+height:360px;
+border-bottom: inset;
+border-bottom-color: #B56951;
+background-color:#DB7F63;
+
+}
+
+#info{
+color: #DB7F63;
+padding-left: 2px;
+
+}
+#container{
+
+width:1024px;
+margin-left: auto;
+margin-right: auto;
+
+
+}
+
+#p{
+height: 30px;
+}
+
+#menu{
+border-bottom: inset;
+border-color: #B56951;
+background-color:#F0AC97;
+}
+
+.nav{
+margin:0;
+padding:0;
+list-style:none;
+}
+
+.nav li{
+float: left;
+width: 222px;
+position: relative;
+}
+
+.nav li a{
+background:#D9A08F;
+color:white;
+display:block;
+padding:7px 8px;
+text-decoration:none;
+border-top:1px solid #069;
+border-bottom:1px solid #069;
+}
+
+.nav li a:hover{
+color:red;
+}
+
+.nav ul{
+dispaly:none;
+position:absolute;
+left:0;
+list-style:none;
+padding:0;
+}
+
+.nav ul li{
+width:256px; 
+float:left;
+}
+
+.nav ul a{
+display:block;
+height:15px;
+padding: 7px 8px;
+color:white;
+text-decoration:none;
+border: 1px solid #222;
+}
+
+.nav ul a:hover{
+color: red;
+}
+
+#in{
+height: 550px;
+}
+
+.slides{
+height: 400px;
+}
+
+#content{
+height: 1630px;
+}
+
+#footer{
+background-color: lightgray;
+color: gray;
+text-align: center;
+height: 20px;
+}
+
+#right{
+width: 700px;
+background-color: black;
+
+}
+
+h2{
+color: gray;
+text-align: center;
+font-weight: solid;
+}
+
+
+.z{
+clear: both;
+height: 450px;
+font-size:30px;
+color: black;
+background-color: #F5F6FA;
+background-image: center;
+}
+.x{
+
+float: left;
+height: 350px;
+width: 300px;
+padding: 5px;
+font-size:20px;
+color: black;
+}
+
+.y{
+clear: both;
+}
+
+#zawartosc{
+width: 1024px;
+font-size:17px;
+color:black;
+border-bottom: inset;
+border-color: #B56951;
+}
+#z{
+height: 40px;
+font-size:25px;
+color: white;
+background-color: #CCCACA;
+text-align: center;
+border-bottom: inset;
+border-color: #B56951;
+}
+h3{
+color: #D9A08F;
+font-size: 25px;
+text-align: center;
+}
+#yt{
+width: 400px;
+height: 315px;
+}
+
+#one{
+font-size: 15px;
+text-align: justify;
+float: left;
+width: 800px;
+}
+
+#two{
+width: 224px;
+float: left;
+background-color: black;
+}
+
+h1{
+align-image: center;
+text-weight:normal;
+color:gray;
+font-size:18px;
+
+}
+
+#plus{
+background-color:#F5F6FA;
+text-align: center;
+}
